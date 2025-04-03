@@ -1,0 +1,387 @@
+/* USER CODE BEGIN Header */
+/***********************************************************************************************************************************
+ ** 【串口引脚】  六个串口的初始化函数UARTx_Init()，将按以下默认引脚进行初始化：
+ **               1- UART1  TX_PA9   RX_PA10
+ **               2- UART2  TX_PA2   RX_PA3
+ **               3- UART3  TX_PB10  RX_PB11
+ **               4- UART4  TX_PC10  RX_PC11
+ **               5- UART5  TX_PC12  RX_PD2
+ **               6- UART6  TX_PC6   RX_PC7
+ **
+ ** 【 CubeMX 】  1- 使用CubeMX开启CAN，
+ **               2- 在CAN1的参数页面，配置波特率为500Kbps: Prescaler-6、BS1-4、BS2-2、SJW-1; 工作模式Operating Mode: Normal;
+ **               3- 在CAN1的中断页面，打勾中断：CAN1 RX0 interrupts
+ **               4- CAN1开启后，默认引脚为PA11+PA12, 修改为PB8_RX、PB9_TX
+ **
+ ** 【代码使用】  每组串口，已封装6个函数，以UART1示范说明：
+ **               初始化:             void      UART1_Init(uint32_t baudrate);                  // 初始化串口; 配置GPIO引脚PA9+PA10、配置通信参数：波特率-None-8-1、配置中断
+ **               发送字符串:         void      UART1_SendString(const char *string,...);       // 发送字符串;   参数：字符串地址; 使用方法如同printf
+ **               发送指定长度：      void      UART1_SendData(uint8_t *data, uint16_t num);    // 发送指定数据; 参数：数据地址、字节数
+ **               获取接收的字节数:   uint16_t  UART1_GetRxNum(void);                           // 获取接收到的字节数; 如果返回值大于0，即为接收到新一帧数据
+ **               获取接收的数据：    uint8_t*  UART1_GetRxData(void);                          // 获取接收到的数据(缓存的地址)
+ **               清零接收标志：      void      UART1_ClearRx(void);                            // 清0接收标志，即清0接收到的字节数; 每次处理完成数据，就要调用这个函数清0
+ **
+ ** 【代码使用】  1- 初始化的代码: CubeMX已生成好了，我们无需修改、增删;
+ **               2- 筛选器的配置: 在bsp_CAN.c中，已写了一个示例函数，调用即可：接收所有数据帧，包括标准帧和扩展帧
+ **               3- 代码开启CAN1: 调用HAL函数 HAL_CAN_Start(&hcan1) ，本函数已在上述自定义的筛选器函数中调用;
+ **               4- 发送，已写好一个自定义的发送函数，在函数中配置报文格式，需要发送时数据，调用函数传入数据即可, 可按需修改;
+ **               5- 接收，已写好自定义的中断接收回调函数，在bsp_CAN.c中。在接收到新帧后，数据自动转存到xCAN1结构体，外部只需检查xCAN1.RXNum > 0，表示已接收到新数据，使用方法详见main.c中使用示范。
+ **               6- 筛选器的配置，是CAN通信中比较难理解的关键点！列表模式、屏蔽模式，刨十来篇网上筛选器配置的文章，必须理解透彻。
+ *******************************************************************************//***********************************************************************************************************************************
+ ** 【串口引脚】  六个串口的初始化函数UARTx_Init()，将按以下默认引脚进行初始化：
+ **               1- UART1  TX_PA9   RX_PA10       特别地说明：魔女开发板，已板载虚拟串口，连接了UART1, 使用和烧录用的同一USB接口，即可通过UART1和电脑进行通信。具体查看资料文件夹中的说明文件。
+ **               2- UART2  TX_PA2   RX_PA3
+ **               3- UART3  TX_PB10  RX_PB11
+ **               4- UART4  TX_PC10  RX_PC11
+ **               5- UART5  TX_PC12  RX_PD2
+ **               6- UART6  TX_PC6   RX_PC7
+ **
+ ** 【 CubeMX 】  1- 使用CubeMX开启CAN，
+ **               2- 在CAN1的参数页面，配置波特率为500Kbps: Prescaler-6、BS1-4、BS2-2、SJW-1; 工作模式Operating Mode: Normal;
+ **               3- 在CAN1的中断页面，打勾中断：CAN1 RX0 interrupts
+ **               4- CAN1开启后，默认引脚为PA11+PA12, 修改为PB8_RX、PB9_TX
+ **  USART----------------------------------------------------------------------
+ ** 【代码使用】  每组串口，已封装6个函数，以UART1示范说明：
+ **               初始化:             void      UART1_Init(uint32_t baudrate);                  // 初始化串口; 配置GPIO引脚PA9+PA10、配置通信参数：波特率-None-8-1、配置中断
+ **               发送字符串:         void      UART1_SendString(const char *string,...);       // 发送字符串;   参数：字符串地址; 使用方法如同printf
+ **               发送指定长度：      void      UART1_SendData(uint8_t *data, uint16_t num);    // 发送指定数据; 参数：数据地址、字节数
+ **               获取接收的字节数:   uint16_t  UART1_GetRxNum(void);                           // 获取接收到的字节数; 如果返回值大于0，即为接收到新一帧数据
+ **               获取接收的数据：    uint8_t*  UART1_GetRxData(void);                          // 获取接收到的数据(缓存的地址)
+ **               清零接收标志：      void      UART1_ClearRx(void);                            // 清0接收标志，即清0接收到的字节数; 每次处理完成数据，就要调用这个函数清0
+ **  CAN------------------------------------------------------------------------
+ ** 【代码使用】  1- 初始化的代码: CubeMX已生成好了，我们无需修改、增删;
+ **               2- 筛选器的配置: 在bsp_CAN.c中，已写了一个示例函数，调用即可：接收所有数据帧，包括标准帧和扩展帧
+ **               3- 代码开启CAN1: 调用HAL函数 HAL_CAN_Start(&hcan1) ，本函数已在上述自定义的筛选器函数中调用;
+ **               4- 发送，已写好一个自定义的发送函数，在函数中配置报文格式，需要发送时数据，调用函数传入数据即可, 可按需修改;
+ **               5- 接收，已写好自定义的中断接收回调函数，在bsp_CAN.c中。在接收到新帧后，数据自动转存到xCAN1结构体，外部只需检查xCAN1.RXNum > 0，表示已接收到新数据，使用方法详见main.c中使用示范。
+ **               6- 筛选器的配置，是CAN通信中比较难理解的关键点！列表模式、屏蔽模式，刨十来篇网上筛选器配置的文章，必须理解透彻。
+ **  LCD------------------------------------------------------------------------
+ ** 【代码使用】  1- 关于触摸的状态检测、坐标获取，本示例通过描点输出，已把机制描述得很直观了。经常还是有人反馈：不明白，已经无力解释~~。
+ **               2- 本示例通过触摸描点，已把基础函数编写好了，用户可以在这个基础上增添设计，如：通过画点函数设计按钮等器件，再通过触摸检测来完善触发。
+ **               3- 如果不懂得如何自行绘制需要的控件、不懂得设计控件的事件，建议盘LVGL; LVGL的优点：轻松绘制控制、事件处理，减少了交互的底层设计; LVGL的缺点：占用大量资源;
+ **               4- 触摸的应用，底层操作仅四步，适用于裸机前后台、FreeRTOS、LVGL：
+ **                  初 始 化: XPT2046_Init(xLCD.width, xLCD.height, xLCD.dir);   // 初始化：宽度，高度，方向
+ **                  触摸判断：XPT2046_IsPressed();                               // 检查触摸屏当前是否被按下; 返回：0-未按下、1-按下; 如果按下，可以调用以下两个函数获取坐标;
+ **                  获取坐标：XPT2046_GetX();                                    // 获取按下的位置的坐标：X; 返回值类型：uint16_t
+ **                            XPT2046_GetX();                                    // 获取按下的位置的坐标：Y; 返回值类型：uint16_t
+ **               5- 如果发现触摸位置不准确, 即按下的位置与画点的位置相距很明显，可以进行重新校准，烧录运行本示例后：方法1：点击左1按键，方法2：用串口助手发送"XPT2046", 程序即可进入重新校准。
+ **               6- 特别地：必须 #include "bsp_W25Q128.h"，因为它里面记录了电阻屏的校准数据; 如果使用固定的显示屏，固定的显示方向，可以直接把它存储到程序中;
+ *******************************************************************************/
+/* USER CODE END Header */
+/* Includes ------------------------------------------------------------------*/
+#include "main.h"
+#include "cmsis_os.h"
+#include "can.h"
+#include "usart.h"
+#include "usb_host.h"
+#include "gpio.h"
+
+/* Private includes ----------------------------------------------------------*/
+/* USER CODE BEGIN Includes */
+#include "stdio.h"               // 标准库
+#include "bsp_UART.h"            // 串口驱动
+#include "bsp_CAN.h"             // CAN驱动
+#include "usbh_hid.h"            // USB中间件交互模式驱动
+#include "bsp_ps2.h"             // PS2手柄驱动
+#include "bsp_LCD_ILI9341.h"     // LCD驱动
+#include "bsp_XPT2046.h"         // 触屏驱动
+#include "bsp_W25Q128.h"         // 外部Flash, 存有触屏的校准数据
+/* USER CODE END Includes */
+
+/* Private typedef -----------------------------------------------------------*/
+/* USER CODE BEGIN PTD */
+
+/* USER CODE END PTD */
+
+/* Private define ------------------------------------------------------------*/
+/* USER CODE BEGIN PD */
+
+/* USER CODE END PD */
+
+/* Private macro -------------------------------------------------------------*/
+/* USER CODE BEGIN PM */
+
+/* USER CODE END PM */
+
+/* Private variables ---------------------------------------------------------*/
+
+/* USER CODE BEGIN PV */
+
+/* USER CODE END PV */
+
+/* Private function prototypes -----------------------------------------------*/
+void SystemClock_Config(void);
+void MX_FREERTOS_Init(void);
+/* USER CODE BEGIN PFP */
+
+/* USER CODE END PFP */
+
+/* Private user code ---------------------------------------------------------*/
+/* USER CODE BEGIN 0 */
+
+/* USER CODE END 0 */
+
+/**
+  * @brief  The application entry point.
+  * @retval int
+  */
+int main(void)
+{
+
+  /* USER CODE BEGIN 1 */
+
+  /* USER CODE END 1 */
+
+  /* MCU Configuration--------------------------------------------------------*/
+
+  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+  HAL_Init();
+
+  /* USER CODE BEGIN Init */
+
+  /* USER CODE END Init */
+
+  /* Configure the system clock */
+  SystemClock_Config();
+
+  /* USER CODE BEGIN SysInit */
+
+  /* USER CODE END SysInit */
+
+  /* Initialize all configured peripherals */
+  MX_GPIO_Init();
+  MX_USART1_UART_Init();
+  MX_CAN1_Init();
+  /* USER CODE BEGIN 2 */
+
+  HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_SET);                // 引脚置高电平，红亮灭
+
+  UART1_Init(115200);                                                             // 初始化 串口1; 已写好底层，调用h中的函数即可使用; 引脚(PA9 +PA10)
+  W25Q128_Init();                                                                 // 外部Flash 初始化，其内部存储有汉字字模数据
+
+  LCD_Init();                                                                     // LCD ILI9341 初始化
+  LCD_SetDir(0);                                                                  // 设置显示方向：0-竖屏、1-横屏
+  XPT2046_Init(xLCD.width, xLCD.height, xLCD.dir);                                // 触摸检测 初始化; 参数：屏宽、屏高、显示的方向
+
+  //CAN1_FilterInit();                                                            // 初始化CAN1的筛选器; 为方便调试，本函数配置为：接收所有数据帧，包括标准帧、扩展帧
+  // 显示提示，可以自行删除
+  LCD_Fill(0, 0, 240, 320, BLACK);                                                // 整个背景填充颜色
+  LCD_String(10, 8, "水 下 矢 量 推 进", 24, WHITE, BLACK);                             // 显示标题;
+  LCD_String(58, 40, "控 制 面 板", 24, WHITE, BLACK);                             // 显示标题;
+  LCD_Line(0, 38, 240, 38, GRAY);                                                 // 画个横线
+  LCD_String(5, 240, "这是一个电阻屏测试程序", 12, WHITE, BLACK);                 // 显示文字;
+  LCD_String(5, 255, "用于示范：触摸检测、坐标获取、画点", 12, WHITE, BLACK);     // 显示文字;
+  LCD_String(5, 270, "如果发现坐标不对，按下左1按键进入校准", 12, WHITE, BLACK);  // 显示文字;
+  LCD_String(5, 285, "电阻屏优点：适合油、潮湿、粉尘等环境", 12, WHITE, BLACK);   // 显示文字;
+  LCD_String(5, 300, "电阻屏缺点：需要使用指尖等硬物触控", 12, WHITE, BLACK);     // 显示文字;
+  /* USER CODE END 2 */
+
+  /* Call init function for freertos objects (in cmsis_os2.c) */
+  MX_FREERTOS_Init();
+
+  /* Start scheduler */
+  osKernelStart();
+
+  /* We should never get here as control is now taken by the scheduler */
+
+  /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
+  while (1)
+  {
+    /* USER CODE END WHILE */
+
+    /* USER CODE BEGIN 3 */
+  }
+  /* USER CODE END 3 */
+}
+
+/**
+  * @brief System Clock Configuration
+  * @retval None
+  */
+void SystemClock_Config(void)
+{
+  RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+  RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+
+  /** Configure the main internal regulator output voltage
+  */
+  __HAL_RCC_PWR_CLK_ENABLE();
+  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
+
+  /** Initializes the RCC Oscillators according to the specified parameters
+  * in the RCC_OscInitTypeDef structure.
+  */
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+  RCC_OscInitStruct.PLL.PLLM = 4;
+  RCC_OscInitStruct.PLL.PLLN = 168;
+  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
+  RCC_OscInitStruct.PLL.PLLQ = 7;
+  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** Initializes the CPU, AHB and APB buses clocks
+  */
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
+
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5) != HAL_OK)
+  {
+    Error_Handler();
+  }
+}
+
+/* USER CODE BEGIN 4 */
+/******************************************************************************
+ * 函  数： HAL_GPIO_EXTI_Callback
+ * 功  能： EXTI中断回调函数
+ * 参  数： uint16_t  GPIO_Pin    引脚编号，参数范围：GPIO_Pin_0 ~ GPIO_Pin_15
+ * 返回值： 无
+ * 备  注： CubeMX生成的代码在思维和风格上，与使用标准库编写时有很大的区别：
+ *          1：这个是回调函数，不是中断服务函数。完整的调用：EXTIx_IRQHandler() > HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_x) > HAL_GPIO_EXTI_Callback(GPIO_PIN_x)
+ *          2：必须使用这个函数名称，因为它在CubeMX生成时，已被写好了各种函数调用、函数弱定义(在stm32xx_hal_gpio.c的底部); 不建议在原弱定义中增添代码，而是重写本函数
+ *          3：中断条件触发后，本函数被自动调用，无需进行人工调用; 也无需进行中断标志的清理，因为HAL_GPIO_EXTI_IRQHandler()函数中已有操作;
+ *          4：生成的所有EXTI中断服务函数，都统一调用这个函数，以引脚编号作参数
+ *          5：判断参数传进来的引脚编号，即可知道是哪个外部中断线产生的中断信号
+******************************************************************************/
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+    if (GPIO_Pin == KEY_1_Pin)                                  // 按键1 产生的中断信号：KEY_1、PA0、闲时下拉、按下时高电平、上升沿触发
+    {
+        HAL_GPIO_TogglePin(LED_RED_GPIO_Port, LED_RED_Pin);     // 反转红色LED灯
+        printf("KEY_1 按下\r");                                 // 通过串口助手输出提示
+    }
+
+    if (GPIO_Pin == KEY_2_Pin)                                  // 按键2 产生的中断信号：KEY_2、PA1、闲时上拉、按下时低电平、下降沿触发
+    {
+        HAL_GPIO_TogglePin(LED_RED_GPIO_Port, LED_RED_Pin);     // 反转红色LED灯
+        printf("KEY_2 按下\r");                                 // 通过串口助手输出提示
+    }
+
+    if (GPIO_Pin == KEY_3_Pin)                                  // 按键3 产生的中断信号：KEY_3、PA4、闲时上拉、按下低高电平、下降沿触发
+    {
+        HAL_GPIO_TogglePin(LED_RED_GPIO_Port, LED_RED_Pin);     // 反转红色LED灯
+        printf("KEY_3 按下\r");                                 // 通过串口助手输出提示
+    }
+}
+
+//PS2手柄解码函数
+extern USBH_StatusTypeDef USBH_HID_PS2_Decode(USBH_HandleTypeDef *phost);
+/******************************************************************************
+ * 函  数： HAL_GPIO_EXTI_Callback
+ * 功  能： USB HOST读取数据回调函数
+ * 参  数： USBH_HandleTypeDef *phost
+ * 返回值： 无
+ * 备  注： 该函数是读取手柄信号的回调函数，那么USB读取的线程在MX_USB_HOST_Init函数中产生
+ *          通过在回调函数中更新电机的值就可以做到手柄控制电机的效果
+******************************************************************************/
+//
+void USBH_HID_EventCallback(USBH_HandleTypeDef *phost)
+{
+	//PS2数据数据解码
+	USBH_HID_PS2_Decode(phost);
+	
+	//获取解码后的ps2手柄信息
+	extern PS2INFO_t ps2_info;
+	PS2INFO_t* ps2 = &ps2_info;
+	
+	static uint32_t lowfre_show = 0;
+	
+	//打印摇杆值
+	if( ++lowfre_show == 128 )
+	{
+		lowfre_show=0;
+		printf("摇杆状态值：\r\n");
+		printf("LX\tLY\tRX\tRY\t\r\n");
+		printf("%d\t%d\t%d\t%d\t\r\n\r\n",ps2->LX,ps2->LY,ps2->RX,ps2->RY);
+	}
+	
+	//定义ps2手柄按键事件变量,用于获取按键的事件
+	PS2KEY_State_t keyEvent;
+	
+	//检测ps2手柄的按键事件,支持单击、双击、长按检测
+	keyEvent = ps2->getKeyEvent(PS2KEY_START); //PS2KEY_START为要检测的按键,可替换为其他按键
+	      if( keyEvent == PS2KEYSTATE_SINGLECLICK ) printf("start按键单击!\r\n");
+	else if( keyEvent == PS2KEYSTATE_DOUBLECLICK ) printf("start按键双击!！\r\n");
+	else if( keyEvent == PS2KEYSTATE_LONGCLICK) printf("start按键长按!！！\r\n");
+
+	keyEvent = ps2->getKeyEvent(PS2KEY_1GREEN); //PS2KEY_1GREEN为要检测的按键,可替换为其他按键
+	      if( keyEvent == PS2KEYSTATE_SINGLECLICK ) printf("右盘绿按键1 单击!\r\n");
+	else if( keyEvent == PS2KEYSTATE_DOUBLECLICK ) printf("右盘绿按键1 双击!！\r\n");
+	else if( keyEvent == PS2KEYSTATE_LONGCLICK) printf("右盘绿按键1 长按!！！\r\n");
+	
+	//定义ps2手柄按键状态变量,用于获取按键的状态值
+	uint8_t keyStatus = 0;
+	
+	//检测ps2手柄按键的状态,按下为1,松开为0
+	keyStatus = ps2->getKeyState(PS2KEY_SELECT); //PS2KEY_SELECT为要检测的按键,可替换为其他按键
+	if( keyStatus == 1 ) printf("select按键按下\r\n");
+	
+	keyStatus = ps2->getKeyState(PS2KEY_UP); //PS2KEY_UP为要检测的按键,可替换为其他按键
+	if( keyStatus == 1 ) printf("左盘按键Up按下\r\n");
+}
+
+
+/* USER CODE END 4 */
+
+/**
+  * @brief  Period elapsed callback in non blocking mode
+  * @note   This function is called  when TIM1 interrupt took place, inside
+  * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment
+  * a global variable "uwTick" used as application time base.
+  * @param  htim : TIM handle
+  * @retval None
+  */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+  /* USER CODE BEGIN Callback 0 */
+
+  /* USER CODE END Callback 0 */
+  if (htim->Instance == TIM1) {
+    HAL_IncTick();
+  }
+  /* USER CODE BEGIN Callback 1 */
+
+  /* USER CODE END Callback 1 */
+}
+
+/**
+  * @brief  This function is executed in case of error occurrence.
+  * @retval None
+  */
+void Error_Handler(void)
+{
+  /* USER CODE BEGIN Error_Handler_Debug */
+  /* User can add his own implementation to report the HAL error return state */
+  __disable_irq();
+  while (1)
+  {
+  }
+  /* USER CODE END Error_Handler_Debug */
+}
+
+#ifdef  USE_FULL_ASSERT
+/**
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @param  line: assert_param error line source number
+  * @retval None
+  */
+void assert_failed(uint8_t *file, uint32_t line)
+{
+  /* USER CODE BEGIN 6 */
+  /* User can add his own implementation to report the file name and line number,
+     ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+  /* USER CODE END 6 */
+}
+#endif /* USE_FULL_ASSERT */

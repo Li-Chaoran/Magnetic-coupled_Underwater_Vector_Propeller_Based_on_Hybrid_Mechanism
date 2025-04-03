@@ -1,0 +1,13 @@
+underwater vector propeller control pkg\heap_4.o: ../Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang/heap_4.c
+underwater vector propeller control pkg\heap_4.o: D:\KEIL5\core\ARM\ARMCC\Bin\..\include\stdlib.h
+underwater vector propeller control pkg\heap_4.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h
+underwater vector propeller control pkg\heap_4.o: D:\KEIL5\core\ARM\ARMCC\Bin\..\include\stddef.h
+underwater vector propeller control pkg\heap_4.o: D:\KEIL5\core\ARM\ARMCC\Bin\..\include\stdint.h
+underwater vector propeller control pkg\heap_4.o: ../Core/Inc/FreeRTOSConfig.h
+underwater vector propeller control pkg\heap_4.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h
+underwater vector propeller control pkg\heap_4.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/portable.h
+underwater vector propeller control pkg\heap_4.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/deprecated_definitions.h
+underwater vector propeller control pkg\heap_4.o: ../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F/portmacro.h
+underwater vector propeller control pkg\heap_4.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/mpu_wrappers.h
+underwater vector propeller control pkg\heap_4.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h
+underwater vector propeller control pkg\heap_4.o: ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h
