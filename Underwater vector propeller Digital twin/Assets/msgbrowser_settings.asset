@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c444d6f85828f1b4f9b89c7c387f9ddd, type: 3}
+  m_Name: msgbrowser_settings
+  m_EditorClassIdentifier: 
+  inputPath: "F:/\u58A8\u7136\u7684\u9700\u8981/\u5B66\u79D1\u7ADE\u8D5B\u548C\u79D1\u7814/\u6C34\u4E0B\u673A\u5668\u4EBA\u53CA\u63A8\u8FDB\u5668\u9879\u76EE/\u6BD5\u4E1A\u8BBE\u8BA1/Control
+    package/src/unity_propeller_msgs"
+  relativeOutPath: RosMessages
