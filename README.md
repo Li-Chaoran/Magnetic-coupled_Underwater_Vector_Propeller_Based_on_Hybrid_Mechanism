@@ -1,9 +1,9 @@
 # 基于混联机构的磁耦合水下矢量推进器
-该库为本人2025年的毕业设计，使用数字孪生和解析解两种方式控制推进器。前者是在Unity平台配合ROS2完成，后者是基于STM32F407+FreeRTOS完成。
+该库为本人2025年的毕业设计，使用数字孪生和解析解两种方式控制推进器。前者是在Unity平台配合ROS2完成，后者是基于STM32F407+FreeRTOS完成。<br/>
 This library is my graduation project in 2025, using digital twin and analytical solution to control the propeller. The former is completed on Unity platform in cooperation with ROS2, while the latter is based on STM32F407+FreeRTOS.
 ## STM32F407 control pkg
-此文件为STM32驱动的整体源文件，代码部署在魔女的F407VET6开发板上，内容移植了CAN驱动，改进移植了达妙科技的驱动库，LCD屏驱动，使用USB协议的PS2手柄驱动，高精度定时器驱动，USART串口，W25Q128Flash驱动，XPT2046触摸屏驱动，其中的Cubemx配置仅供参考，代码中有些地方都是手动添加的驱动，所以具体程序看源码，代码基本写上了注释，如有问题请随时联系我，谢谢。
+此文件为STM32驱动的整体源文件，代码部署在魔女的F407VET6开发板上，内容移植了CAN驱动，改进移植了达妙科技的驱动库，LCD屏驱动，使用USB协议的PS2手柄驱动，高精度定时器驱动，USART串口，W25Q128Flash驱动，XPT2046触摸屏驱动，其中的Cubemx配置仅供参考，代码中有些地方都是手动添加的驱动，所以具体程序看源码，代码基本写上了注释，如有问题请随时联系我，谢谢。<br/>
 This file is the overall source file of STM32 driver. The code is deployed on the development board F407VET6. The content of CAN driver is transplanted. The driver library of Damiao Technology is improved and transplanted. LCD screen driver, PS2 handle driver using USB protocol, high-precision timer driver, USART serial port, W25Q128Flash driver, XPT2046 touch screen driver. The Cubemx configuration is only for reference. Some parts of the code are manually added drivers. Therefore, the specific program is based on the source code. The code is basically annotated. If there is any problem, please contact me at any time. Thank you.
 ## Underwater vector propeller Digital twin
-此文件是Unity的工程文件，Unity版本为2021.3.29f1c1。该文件包含了相关并联机构的配置，可以查阅工程，看看本人约束并联机构的思路，同时编写相关的UI面板，并配置了ROS2和Unity之间的通讯，Unity游戏运行过程中会自动查找ROS2节点，同时发布目标角度，订阅反馈角度。
+此文件是Unity的工程文件，Unity版本为2021.3.29f1c1。该文件包含了相关并联机构的配置，可以查阅工程，看看本人约束并联机构的思路，同时编写相关的UI面板，并配置了ROS2和Unity之间的通讯，Unity游戏运行过程中会自动查找ROS2节点，同时发布目标角度，订阅反馈角度。<br/>
 This is Unity's engineering document, Unity version 2021.3.29f1c1. This document includes the configuration of the relevant parallel mechanism. You can refer to the project to see the idea of restricting the parallel mechanism. Meanwhile, you can compile the relevant UI panel, and configure the communication between ROS2 and Unity. During the operation of Unity game, you will automatically find the ROS2 node, release the target angle and subscribe the feedback angle.
