@@ -1,0 +1,45 @@
+/COM,ANSYS RELEASE 2022 R1           BUILD 22.1      UP20211129       19:42:47
+
+ *** WARNING ***                         CP =       0.797   TIME= 19:42:48
+ Element shape checking is currently inactive.  Issue SHPP,ON or         
+ SHPP,WARN to reactivate, if desired.                                    
+
+ *** WARNING ***                         CP =       0.828   TIME= 19:42:48
+ Material number 9 (used by element 15187) should normally have at least 
+ one MP or one TB type command associated with it.  Output of energy by  
+ material may not be available.                                          
+
+ *** WARNING ***                         CP =       1.562   TIME= 19:42:49
+ For element 15187 the element connectivity is 0 and 19294.  The node    
+ which is identified as a 0 will be a grounded node.                     
+
+ *** WARNING ***                         CP =       1.562   TIME= 19:42:49
+ For element 15188 the element connectivity is 0 and 19296.  The node    
+ which is identified as a 0 will be a grounded node.                     
+
+ *** WARNING ***                         CP =       1.578   TIME= 19:42:49
+ The sparse solver must be used if any current technology elements with  
+ u-P formulation or MPC184 elements using Lagrangian multiplier          
+ entangle with other contraint equtions.  The equation solver option     
+ has been switched to the sparse solver.                                 
+
+ *** WARNING ***                         CP =       1.734   TIME= 19:42:49
+ For element 15187 the element connectivity is 0 and 19294.  The node    
+ which is identified as a 0 will be a grounded node.                     
+
+ *** WARNING ***                         CP =       2.062   TIME= 19:42:49
+ For element 15188 the element connectivity is 0 and 19296.  The node    
+ which is identified as a 0 will be a grounded node.                     
+
+ *** WARNING ***                         CP =       2.062   TIME= 19:42:49
+ Coefficient ratio exceeds 1.0e8 - Check results.                        
+
+ *** WARNING ***                         CP =       2.391   TIME= 19:42:49
+ Pivoting has been activated for the Distributed Sparse Matrix Solver .  
+ The memory required may greatly exceed the predicted amount.  In that   
+ event, use the DSPOPTION command to change the memory mode and/or       
+ memory size used by the Distributed Sparse Matrix Solver.               
+
+ *** WARNING ***                         CP =      98.375   TIME= 19:44:33
+ Contact element 15452 (real ID 3) status changes abruptly from          
+ no-contact -> contact (with target element 15693).                      

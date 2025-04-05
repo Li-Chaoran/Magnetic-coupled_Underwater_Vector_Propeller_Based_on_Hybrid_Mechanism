@@ -1,0 +1,70 @@
+# encoding: utf-8
+# 2022 R1
+SetScriptVersion(Version="22.1.217")
+template1 = GetTemplate(
+    TemplateName="Static Structural",
+    Solver="ANSYS")
+system1 = template1.CreateSystem()
+engineeringData1 = system1.GetContainer(ComponentName="Engineering Data")
+material1 = engineeringData1.GetMaterial(Name="结构钢")
+material1.SetSuppression(Suppressed=True)
+material1.SetSuppression(Suppressed=False)
+material1.SetSuppression(Suppressed=True)
+material1.SetSuppression(Suppressed=False)
+matl1 = engineeringData1.CreateMaterial(Name="6061铝合金")
+matl1.SetSuppression(Suppressed=True)
+matl1.SetSuppression(Suppressed=False)
+matl1.Delete()
+favorites1 = EngData.LoadFavoriteItems()
+library1 = EngData.OpenLibrary(
+    Name="General Materials",
+    Source="General_Materials.xml")
+matl2 = engineeringData1.ImportMaterial(
+    Name="Aluminum Alloy",
+    Source="General_Materials.xml")
+geometry1 = system1.GetContainer(ComponentName="Geometry")
+geometry1.Edit(IsSpaceClaimGeometry=True)
+modelComponent1 = system1.GetComponent(Name="Model")
+modelComponent1.Refresh()
+model1 = system1.GetContainer(ComponentName="Model")
+model1.Edit()
+geometry1.Exit()
+model1.Exit()
+geometry1.SetFile(FilePath="F:/墨然的需要/学科竞赛和科研/水下机器人及推进器项目/毕业设计/Ansys校核/受压关键零件校核.STEP")
+modelComponent1.Refresh()
+model1.Edit()
+model1.Edit()
+Save(Overwrite=True)
+model1.Edit()
+Save(Overwrite=True)
+Save(Overwrite=True)
+model1.Edit()
+model1.Edit()
+Save(Overwrite=True)
+model1.Edit()
+Save(Overwrite=True)
+model1.Edit()
+results1 = system1.GetContainer(ComponentName="Results")
+results1.Edit()
+Save(Overwrite=True)
+model1.Edit()
+Save(Overwrite=True)
+model1.Exit()
+Save(Overwrite=True)
+Reset()
+Extensions.UnloadExtension(
+    Id="5e7e01a6-8601-11e8-9f8c-28f10e13ffe6",
+    Version="2021.2",
+    Format="Binary")
+Extensions.UnloadExtension(
+    Id="5f463412-bd3e-484b-87e7-cbc0a665e474",
+    Version="2021.1",
+    Format="Binary")
+Extensions.UnloadExtension(
+    Id="7b0e9e84-396d-4099-9602-2ced9dddc253",
+    Version="2022.1",
+    Format="Binary")
+Extensions.UnloadExtension(
+    Id="f3e3da52-fb02-4910-8cc9-980efd047bc6",
+    Version="2021.2",
+    Format="Binary")
