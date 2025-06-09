@@ -1,6 +1,6 @@
 ![image](https://raw.githubusercontent.com/Li-Chaoran/Magnetic-coupled_Underwater_Vector_Propeller_Based_on_Hybrid_Mechanism/refs/heads/main/Pictures/cover.png)
 # 基于混联机构的磁耦合水下矢量推进器
-本项目为中国机械行业卓越工程师教育联盟第八届“精雕杯”毕业设计大赛铜奖作品
+本项目为中国机械行业卓越工程师教育联盟第八届“精雕杯”毕业设计大赛铜奖作品<br/>
 该库为本人2025年的毕业设计，使用数字孪生和解析解两种方式控制推进器。前者是在Unity平台配合ROS2完成，后者是基于STM32F407+FreeRTOS完成。<br/>
 This library is my graduation project in 2025, using digital twin and analytical solution to control the propeller. The former is completed on Unity platform in cooperation with ROS2, while the latter is based on STM32F407+FreeRTOS.
 ![image](https://raw.githubusercontent.com/Li-Chaoran/Magnetic-coupled_Underwater_Vector_Propeller_Based_on_Hybrid_Mechanism/refs/heads/main/Pictures/outlook.jpg)
