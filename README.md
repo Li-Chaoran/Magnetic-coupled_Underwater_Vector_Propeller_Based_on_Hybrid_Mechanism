@@ -24,3 +24,4 @@ This folder contains the static finite element analysis of the key bearing parts
 如需知晓逆运动学的具体步骤，可查阅My Undergraduate Thesis文件，这是我的毕业论文。<br/>
 如需知晓推进器的内部结构，可查阅Assembly Drawings文件，这是我的图纸。<br/>
 如需查看具体演示视频，可移步至网址
+https://www.bilibili.com/video/BV1XnTazCEF7/?vd_source=59eaf7182f1cdf0943a6bd570f14f825
