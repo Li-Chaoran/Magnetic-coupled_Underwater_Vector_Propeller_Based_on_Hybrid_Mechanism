@@ -16,8 +16,8 @@ This folder contains the static finite element analysis of the key bearing parts
 ![image]([https://github.com/Li-Chaoran/Magnetic-coupled_Underwater_Vector_Propeller_Based_on_Hybrid_Mechanism/blob/main/Pictures/](https://raw.githubusercontent.com/Li-Chaoran/Magnetic-coupled_Underwater_Vector_Propeller_Based_on_Hybrid_Mechanism/refs/heads/main/Pictures/)Trace%20plot%20map.gif)
 ![image](https://raw.githubusercontent.com/Li-Chaoran/Magnetic-coupled_Underwater_Vector_Propeller_Based_on_Hybrid_Mechanism/refs/heads/main/Pictures/Velocity%20nephogram.gif)
 ## 推力测试
-经过测试，持续推力可达43.7N，持续推力66.1N
-![image](https://raw.githubusercontent.com/Li-Chaoran/Magnetic-coupled_Underwater_Vector_Propeller_Based_on_Hybrid_Mechanism/refs/heads/main/Pictures/Continuous%20thrust%20force.png)
+经过测试，持续推力可达43.7N，持续推力66.1N<br/>
+![image](https://raw.githubusercontent.com/Li-Chaoran/Magnetic-coupled_Underwater_Vector_Propeller_Based_on_Hybrid_Mechanism/refs/heads/main/Pictures/Continuous%20thrust%20force.png)<br/>
 ![image](https://raw.githubusercontent.com/Li-Chaoran/Magnetic-coupled_Underwater_Vector_Propeller_Based_on_Hybrid_Mechanism/refs/heads/main/Pictures/Maximum%20thrust%20force.png)
 ## 其他文件的相关说明
 如需知晓逆运动学的具体步骤，可查阅My Undergraduate Thesis文件，这是我的毕业论文。<br/>
