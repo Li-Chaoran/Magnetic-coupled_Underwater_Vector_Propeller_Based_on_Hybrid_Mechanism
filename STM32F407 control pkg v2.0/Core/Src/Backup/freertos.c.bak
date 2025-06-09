@@ -1,0 +1,206 @@
+/* USER CODE BEGIN Header */
+/**
+  ******************************************************************************
+  * File Name          : freertos.c
+  * Description        : Code for freertos applications
+  ******************************************************************************
+  * @attention
+  *
+  * Copyright (c) 2025 STMicroelectronics.
+  * All rights reserved.
+  *
+  * This software is licensed under terms that can be found in the LICENSE file
+  * in the root directory of this software component.
+  * If no LICENSE file comes with this software, it is provided AS-IS.
+  *
+  ******************************************************************************
+  */
+/* USER CODE END Header */
+
+/* Includes ------------------------------------------------------------------*/
+#include "FreeRTOS.h"
+#include "task.h"
+#include "main.h"
+#include "cmsis_os.h"
+
+/* Private includes ----------------------------------------------------------*/
+/* USER CODE BEGIN Includes */
+#include "bsp_UART.h"
+#include "bsp_CAN.h"
+#include "usb_host.h"
+/* USER CODE END Includes */
+
+/* Private typedef -----------------------------------------------------------*/
+/* USER CODE BEGIN PTD */
+extern void MX_USB_HOST_Process(void);
+/* USER CODE END PTD */
+
+/* Private define ------------------------------------------------------------*/
+/* USER CODE BEGIN PD */
+
+/* USER CODE END PD */
+
+/* Private macro -------------------------------------------------------------*/
+/* USER CODE BEGIN PM */
+
+/* USER CODE END PM */
+
+/* Private variables ---------------------------------------------------------*/
+/* USER CODE BEGIN Variables */
+/* 声明任务句柄 */
+TaskHandle_t xUsartTaskHandle = NULL;
+BaseType_t ret;  // 接收判断任务创建是否成功的变量
+/* USER CODE END Variables */
+osThreadId defaultTaskHandle;
+
+/* Private function prototypes -----------------------------------------------*/
+/* USER CODE BEGIN FunctionPrototypes */
+void UsartTask(void *params){
+  MX_USB_HOST_Init();
+  while(1){
+        /** 10ms延时,释放控制权 **/        
+        vTaskDelay(10);                                                                                              
+//        /** 检查UART1是否收到数据 (串口助手) **/                                                        
+//        if (UART1_GetRxNum())                                                                            // 判断UART1是否获取到新一帧数据：函数返回的接收字节数，大于0，即为收到新一帧数据
+//        {                                                                                               
+//            uint8_t *rxData = UART1_GetRxData();                                                         // 获取数据的地址
+//            uint16_t rxNum = UART1_GetRxNum();                                                           // 获取数据的字节数
+//                                                                                                        
+//            printf("\r<<<<< USART1 收到一帧数据 \r");                                                    // 提示
+//            printf("字节数：%d \r", rxNum);                                                              // 显示字节数
+//            printf("ASCII : %s\r", (char *)rxData);                                                      // 显示数据，以ASCII方式显示，即以字符串的方式显示
+//            printf("16进制: ");                                                                          // 显示数据，以16进制方式，显示每一个字节的值
+//            for (uint16_t i = 0; i < rxNum; i++)                                                         // 逐个字节输出
+//                printf("0x%X ", rxData[i]);                                                              // 以16进制显示
+//            printf("\r\r");                                                                              // 显示换行
+//                                                                                                        
+//            // UART1_SendString("Hello World！\r");                                                      // 本行示范 UART1_SendString( )的使用; 可接受像pritnf的格式化参数
+//            // CAN1_SendData(rxData, 8);                                                                    // 本行示范 CAN1_SendData( )的使用, 可用于发送字符串、数组、结构体数据等
+//            UART1_ClearRx();                                                                             // 重要：清0接收标志，即清0接收到的字节数; 每次处理完成数据，就要调用这个函数清0
+//        }
+
+//        /** 检查CAN1是否收到数据 **/
+//        if (xCAN1.RxNum)                                                                                 // 接收标志位、字节数; 检查此值是否大于0，以判断是否接收到新一帧数据
+//        {
+//            static uint16_t  canRxCNT = 1;                                                               // 用于计算已接收了多少帧数据; 非必要;
+//            printf("\r****** CAN 接收到第%d帧新数据 ******", canRxCNT++);                                // 准备把CAN帧报文，详细地输出到串口软件，方便观察调试
+//            printf("\r 帧类型：%s",   xCAN1.RxHeader.RTR ? "遥控帧" : "数据帧");                         // 帧类型
+//            printf("\r 帧格式：%s",   xCAN1.RxHeader.IDE ? "扩展帧" : "标准帧");                         // 帧格式
+//            printf("\r 标识符：0x%X", xCAN1.RxHeader.IDE ? xCAN1.RxHeader.ExtId : xCAN1.RxHeader.StdId); // 帧ID
+//            printf("\r 字节数：%d",   xCAN1.RxHeader.DLC);                                               // 字节数
+//            printf("\r 筛选器匹配序号：%d", xCAN1.RxHeader.FilterMatchIndex);                            // 筛选器匹配序号; 和筛选器编号，是不一样的。大概：从筛选器0开始，每个16位宽筛选器+2, 32位宽+1, 没有被使用的筛选器，默认是16位宽，+2;
+//            printf("\r 显示数据(16进制)：");                                                             // 16进制方式显示数据，方便观察真实数据
+//            for (uint8_t i = 0; i < xCAN1.RxNum; i++)                                                    // 逐个字节显示CAN的数据值
+//                printf(" 0x%X ", xCAN1.RxData[i]);                                                       // 格式：16进制显示
+//            printf("\r");                                                                                // 换行，以使每帧的输出更清晰
+
+//            xCAN1.RxNum = 0;                                                                             // 字节数清0; 每次处理完一帧数据，需要将xCAN1.RxNum变量清0，即：xCAN1.RxNum=0，以方便下一轮的判断，避免重复处理同一帧数据;
+
+//            if (strstr((char *)xCAN1.RxData, "CAN_Test"))                                                // 判断是否测试工具发过来的指定数据
+//            {
+//                static char strTemp[8] = "CAN_OK";                                                       // 测试工具约定好的返回数据
+//                CAN1_SendData((uint8_t *)strTemp, 8);                                                    // 发送CAN报文
+//            }
+//        }
+//        
+//        /** 每500ms发送一帧CAN报文，方便CAN总线上的其它设备测试接收 **/
+//        static uint16_t msCAN = 0;                                                                   
+//        if (++msCAN == 500)                                                                              // 每500ms执行一次
+//        {                                                                                             
+//            msCAN = 0;                                                                                   // 计数清0
+//            static uint8_t msgData[30] = { 0, 2, 4, 6, 8, 10, 12, 14 };                                  // 定义一个简单的数组，用于CAN的发送示范; 这里开辟了30字节的空间，暂时只赋值了前8个字节，后22个字节值为0;
+//            CAN1_SendData(msgData, 6);                                                                   // CAN1发送数据(自定义函数)，每500ms一次，以方便外部设备测试接收; CAN每帧最大8字节，这里只发6字节是为了示范：CAN发送的字节数与数组定义的大小，没一毛钱关系。
+//        }                                                                                                                                                                                                   
+        /** 每500ms闪烁一次蓝色LED, 以方便外部观察运行情况 **/                                        
+        static uint16_t msLED = 0;                                                                    
+        if (++msLED == 50)                                                                              // 每500ms执行一次
+        {                                                                                             
+            msLED = 0;                                                                                   // 计数清0
+            HAL_GPIO_TogglePin(LED_BLUE_GPIO_Port, LED_BLUE_Pin);                                        // 规律地闪烁蓝色LED，方便外部观察系统是否正常运行
+        }
+    }
+};
+
+/* USER CODE END FunctionPrototypes */
+
+void StartDefaultTask(void const * argument);
+
+extern void MX_USB_HOST_Init(void);
+void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
+
+/* GetIdleTaskMemory prototype (linked to static allocation support) */
+void vApplicationGetIdleTaskMemory( StaticTask_t **ppxIdleTaskTCBBuffer, StackType_t **ppxIdleTaskStackBuffer, uint32_t *pulIdleTaskStackSize );
+
+/* USER CODE BEGIN GET_IDLE_TASK_MEMORY */
+static StaticTask_t xIdleTaskTCBBuffer;
+static StackType_t xIdleStack[configMINIMAL_STACK_SIZE];
+
+void vApplicationGetIdleTaskMemory( StaticTask_t **ppxIdleTaskTCBBuffer, StackType_t **ppxIdleTaskStackBuffer, uint32_t *pulIdleTaskStackSize )
+{
+  *ppxIdleTaskTCBBuffer = &xIdleTaskTCBBuffer;
+  *ppxIdleTaskStackBuffer = &xIdleStack[0];
+  *pulIdleTaskStackSize = configMINIMAL_STACK_SIZE;
+  /* place for user code */
+}
+/* USER CODE END GET_IDLE_TASK_MEMORY */
+
+/**
+  * @brief  FreeRTOS initialization
+  * @param  None
+  * @retval None
+  */
+void MX_FREERTOS_Init(void) {
+  /* USER CODE BEGIN Init */
+
+  /* USER CODE END Init */
+
+  /* USER CODE BEGIN RTOS_MUTEX */
+  /* add mutexes, ... */
+  /* USER CODE END RTOS_MUTEX */
+
+  /* USER CODE BEGIN RTOS_SEMAPHORES */
+  /* add semaphores, ... */
+  /* USER CODE END RTOS_SEMAPHORES */
+
+  /* USER CODE BEGIN RTOS_TIMERS */
+  /* start timers, add new ones, ... */
+  /* USER CODE END RTOS_TIMERS */
+
+  /* USER CODE BEGIN RTOS_QUEUES */
+  /* add queues, ... */
+  /* USER CODE END RTOS_QUEUES */
+
+  /* Create the thread(s) */
+  /* definition and creation of defaultTask */
+  //osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 128);
+  //defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
+
+  /* USER CODE BEGIN RTOS_THREADS */
+  /* add threads, ... */
+  ret = xTaskCreate(UsartTask, "UsartTask", 128, NULL, osPriorityNormal+1, &xUsartTaskHandle);
+  /* USER CODE END RTOS_THREADS */
+
+}
+
+/* USER CODE BEGIN Header_StartDefaultTask */
+/**
+  * @brief  Function implementing the defaultTask thread.
+  * @param  argument: Not used
+  * @retval None
+  */
+/* USER CODE END Header_StartDefaultTask */
+void StartDefaultTask(void const * argument)
+{
+  /* init code for USB_HOST */
+
+  /* USER CODE BEGIN StartDefaultTask */
+  /* Infinite loop */
+  for(;;)
+  {}  
+  /* USER CODE END StartDefaultTask */
+}
+
+/* Private application code --------------------------------------------------*/
+/* USER CODE BEGIN Application */
+
+/* USER CODE END Application */
